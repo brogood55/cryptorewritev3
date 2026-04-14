@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoWrite — Content Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0d;
+    --bg-card: #111318;
+    --bg-input: #161a1f;
+    --border: rgba(255,255,255,0.07);
+    --border-active: rgba(255,255,255,0.18);
+    --accent: #e8d5a3;
+    --accent-dim: rgba(232,213,163,0.12);
+    --accent-dim2: rgba(232,213,163,0.06);
+    --text-primary: #f0ece4;
+    --text-secondary: #7a7f8a;
+    --text-muted: #3d4148;
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.1);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.1);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.1);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,11,13,0.95);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+  .header-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* LAYOUT */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  /* PAGE TITLE */
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .page-title::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--text-muted);
+  }
+
+  /* INPUT SECTION */
+  .input-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 14px 16px;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  textarea::placeholder { color: var(--text-muted); }
+  textarea:focus { border-color: var(--border-active); }
+
+  /* OPTIONS ROW */
+  .options-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .option-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    flex: 1;
+    min-width: 200px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .option-card:hover { border-color: var(--border-active); }
+  .option-card.active {
+    border-color: var(--accent);
+    background: var(--accent-dim2);
+  }
+
+  .option-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .option-card.active .option-title { color: var(--accent); }
+  .option-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* PLATFORM TOGGLE */
+  .platform-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .platform-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    color: var(--text-secondary);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .platform-btn:hover { border-color: var(--border-active); color: var(--text-primary); }
+  .platform-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim2);
+  }
+  .platform-icon { font-size: 12px; }
+
+  /* GENERATE BTN */
+  .btn-generate {
+    width: 100%;
+    background: var(--accent);
+    color: #0a0b0d;
+    border: none;
+    border-radius: var(--radius);
+    padding: 13px 24px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-transform: uppercase;
+  }
+  .btn-generate:hover { opacity: 0.9; }
+  .btn-generate:active { transform: scale(0.99); }
+  .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* RESULTS */
+  .results-container {
+    margin-top: 24px;
+    display: none;
+  }
+  .results-container.visible { display: block; }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .result-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+  }
+  .result-tab {
+    padding: 6px 14px;
+    border-radius: 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .result-tab.active {
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  .result-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .result-toolbar {
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .result-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .meta-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .badge-twitter { background: var(--blue-dim); color: var(--blue); }
+  .badge-telegram { background: rgba(96,165,250,0.08); color: #38bdf8; }
+  .badge-short { background: var(--green-dim); color: var(--green); }
+  .badge-thread { background: var(--accent-dim); color: var(--accent); }
+  .badge-article { background: rgba(167,139,250,0.1); color: #a78bfa; }
+
+  .char-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-secondary);
+  }
+
+  .result-content {
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    min-height: 80px;
+  }
+
+  .result-content.loading {
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  /* Thread posts styling */
+  .thread-post {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .thread-post-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.1em;
+  }
+  .thread-connector {
+    width: 1px;
+    height: 10px;
+    background: var(--border-active);
+    margin: -4px auto 4px;
+  }
+
+  .toolbar-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .btn-action {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: var(--text-secondary);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .btn-action:hover { border-color: var(--border-active); color: var(--text-primary); }
+  .btn-action.copied { border-color: var(--green); color: var(--green); }
+
+  /* Divider between output sections */
+  .output-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 10px 0;
+  }
+
+  /* Output panel tab contents */
+  .output-panel { display: none; }
+  .output-panel.active { display: block; }
+
+  /* Loading spinner */
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--text-muted);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error */
+  .error-msg {
+    background: var(--red-dim);
+    border: 1px solid rgba(248,113,113,0.2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--red);
+    margin-top: 12px;
+    display: none;
+  }
+  .error-msg.visible { display: block; }
+
+  /* Status bar */
+  .status-bar {
+    border-top: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.06em;
+  }
+  .status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Settings panel */
+  .settings-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .settings-chip {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .settings-chip:hover { border-color: var(--border-active); color: var(--text-primary); }
+  .settings-chip.active {
+    border-color: rgba(232,213,163,0.4);
+    color: var(--accent);
+    background: var(--accent-dim2);
+  }
+  .chip-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .container { padding: 20px 16px 60px; }
+    header { padding: 0 16px; }
+    .option-card { min-width: 100%; }
+    .options-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    CRYPTOWRITE
+  </div>
+  <span class="header-tag">Content Generator</span>
+</header>
+
+<div class="container">
+
+  <!-- API Key Banner -->
+  <div id="apiBanner" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+    <div style="font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-secondary); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap;">Groq API Key</div>
+    <div style="flex: 1; min-width: 200px; position: relative;">
+      <input type="password" id="apiKeyInput" placeholder="gsk_••••••••••••••••••" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-primary); font-family: 'DM Mono', monospace; font-size: 12px; padding: 8px 80px 8px 12px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--border-active)'" onblur="this.style.borderColor='var(--border)'" oninput="saveApiKey(this.value)" />
+      <button onclick="toggleKeyVisibility()" id="toggleBtn" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-secondary); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.08em; cursor: pointer; text-transform: uppercase; padding: 2px 4px;">Show</button>
+    </div>
+    <a href="https://console.groq.com/keys" target="_blank" style="font-family: 'DM Mono', monospace; font-size: 9px; color: var(--accent); letter-spacing: 0.08em; text-decoration: none; white-space: nowrap; opacity: 0.7;">Get free key ↗</a>
+  </div>
+  <div class="page-title">Raw Analysis Input</div>
+
+  <!-- Input -->
+  <div class="input-section">
+    <div class="section-label">Your raw analysis / insight</div>
+    <textarea id="rawInput" placeholder="Paste your raw crypto analysis or insight here in English. E.g: BTC forming bullish divergence on 4H RSI while price consolidates above 65k support. Volume declining on red candles suggesting sell pressure is weakening. If 67k breaks with volume, next target 72k..."></textarea>
+  </div>
+
+  <!-- Format Mode -->
+  <div class="section-label" style="padding: 0 0 10px; color: var(--text-secondary);">Output format</div>
+  <div class="options-row">
+    <div class="option-card active" onclick="selectMode('short')" id="mode-short">
+      <div class="option-title">Quick Post</div>
+      <div class="option-desc">Twitter + Telegram — short, readable in 8 sec. Hook → insight → soft CTA.</div>
+    </div>
+    <div class="option-card" onclick="selectMode('long')" id="mode-long">
+      <div class="option-title">Deep Analysis</div>
+      <div class="option-desc">Thread + Full Article — breakdown for X Threads and long-form article.</div>
+    </div>
+  </div>
+
+  <!-- Platform -->
+  <div class="section-label" style="padding: 0 0 10px; color: var(--text-secondary);">Platform target</div>
+  <div class="platform-row">
+    <button class="platform-btn active" onclick="selectPlatform('both')" id="plat-both">
+      <span class="platform-icon">◈</span> Both
+    </button>
+    <button class="platform-btn" onclick="selectPlatform('twitter')" id="plat-twitter">
+      <span class="platform-icon">𝕏</span> Twitter / X
+    </button>
+    <button class="platform-btn" onclick="selectPlatform('telegram')" id="plat-telegram">
+      <span class="platform-icon">✈</span> Telegram
+    </button>
+  </div>
+
+  <!-- Tone chips -->
+  <div class="section-label" style="padding: 0 0 10px; color: var(--text-secondary);">Tone</div>
+  <div class="settings-row">
+    <div class="settings-chip active" onclick="selectTone(this, 'analyst')" data-tone="analyst">
+      <span class="chip-dot"></span> Professional Analyst
+    </div>
+    <div class="settings-chip" onclick="selectTone(this, 'alpha')" data-tone="alpha">
+      <span class="chip-dot"></span> Alpha Trader
+    </div>
+    <div class="settings-chip" onclick="selectTone(this, 'educator')" data-tone="educator">
+      <span class="chip-dot"></span> Educator
+    </div>
+  </div>
+
+  <!-- Generate -->
+  <button class="btn-generate" id="generateBtn" onclick="generate()">Generate Content</button>
+  
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- Results -->
+  <div class="results-container" id="resultsContainer">
+    <div class="result-header">
+      <div class="result-tabs" id="resultTabs">
+        <!-- tabs injected by JS -->
+      </div>
+      <div style="font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em;">AI-REWRITTEN</div>
+    </div>
+
+    <div class="result-card" id="resultCard">
+      <!-- content injected by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+let currentMode = 'short';
+let currentPlatform = 'both';
+let currentTone = 'analyst';
+let currentTab = 0;
+let generatedOutputs = [];
+
+const WORKER_URL = 'https://YOUR_WORKER.workers.dev'; // <-- ganti dengan URL Cloudflare Worker kamu
+
+// API Key helpers — simpan di localStorage agar tidak perlu isi ulang
+function saveApiKey(val) {
+  localStorage.setItem('groq_api_key', val.trim());
+}
+function loadApiKey() {
+  const saved = localStorage.getItem('groq_api_key') || '';
+  if (saved) document.getElementById('apiKeyInput').value = saved;
+}
+function toggleKeyVisibility() {
+  const inp = document.getElementById('apiKeyInput');
+  const btn = document.getElementById('toggleBtn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'Hide'; }
+  else { inp.type = 'password'; btn.textContent = 'Show'; }
+}
+window.addEventListener('load', loadApiKey);
+
+function selectMode(mode) {
+  currentMode = mode;
+  document.getElementById('mode-short').classList.toggle('active', mode === 'short');
+  document.getElementById('mode-long').classList.toggle('active', mode === 'long');
+}
+
+function selectPlatform(plat) {
+  currentPlatform = plat;
+  ['both','twitter','telegram'].forEach(p => {
+    document.getElementById('plat-' + p).classList.toggle('active', p === plat);
+  });
+}
+
+function selectTone(el, tone) {
+  currentTone = tone;
+  document.querySelectorAll('.settings-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function buildSystemPrompt() {
+  const toneMap = {
+    analyst: 'professional crypto market analyst — data-driven, precise, measured confidence',
+    alpha: 'bold alpha trader — confident, direct, slightly edgy but never reckless',
+    educator: 'clear crypto educator — accessible, informative, jargon explained naturally'
+  };
+
+  return `You are a ${toneMap[currentTone]} writing polished crypto content for social media.
+
+CRITICAL RULES:
+- Write ONLY in English. Sound like a native speaker — natural, fluent, not translated.
+- NEVER use hashtags.
+- ONLY use ticker format like $BTC, $ETH, BTCUSDT, or full name like Bitcoin — never mix styles.
+- No emojis unless specifically requested.
+- Include opinion AND risk — not just facts.
+- Every post must have a hook on line 1.
+- Soft question or observation at the end — don't beg for engagement.
+
+Respond ONLY with valid JSON. No markdown, no backticks, no preamble.`;
+}
+
+function buildUserPrompt(rawText) {
+  const platforms = {
+    both: ['twitter', 'telegram'],
+    twitter: ['twitter'],
+    telegram: ['telegram']
+  };
+  const plats = platforms[currentPlatform];
+
+  if (currentMode === 'short') {
+    const outputs = [];
+    plats.forEach(p => {
+      outputs.push(`"${p}_short": "Twitter/Telegram short post for ${p}. STRUCTURE:\\n1. Hook (1 bold line)\\n2. Short answer (1 line — what's the point)\\n3. Breakdown: exactly 3-4 short lines. Each line max 12 words. Easy to skim.\\n4. Opinion + Risk line\\n5. Soft close question (1 line)\\nMAX 220 characters for Twitter, max 300 for Telegram. No hashtags. Plain text, line breaks only."`);
+    });
+    return `Raw analysis: """${rawText}"""
+
+Generate content. Return JSON:
+{
+  ${outputs.join(',\n  ')}
+}`;
+  } else {
+    const outputs = [];
+    if (plats.includes('twitter')) {
+      outputs.push(`"twitter_thread": "Array of 4-6 tweet strings for an X Thread. First tweet is the hook. Each tweet max 260 chars. Last tweet has soft question. No hashtags. Return as JSON array of strings."`);
+      outputs.push(`"twitter_short": "Single Twitter post version — short, punchy, under 250 chars. Hook + key insight + soft question."`);
+    }
+    if (plats.includes('telegram')) {
+      outputs.push(`"telegram_thread": "Array of 4-6 message strings for a Telegram thread/channel. Each part is a self-contained message. Clean line breaks. No hashtags."`);
+      outputs.push(`"telegram_short": "Single Telegram post — slightly longer than Twitter (max 350 chars). More context allowed."`);
+    }
+    outputs.push(`"article": "Long-form article. Structure: Title | Lead paragraph (2-3 sentences) | Section 1: Setup/Context | Section 2: The Signal / What's happening | Section 3: Bull case | Section 4: Risk & Bear case | Section 5: Key levels to watch | Closing paragraph with forward-looking observation. Min 400 words. Analytical tone. No hashtags."`);
+    
+    return `Raw analysis: """${rawText}"""
+
+Generate deep analysis content. Return JSON:
+{
+  ${outputs.join(',\n  ')}
+}`;
+  }
+}
+
+async function generate() {
+  const raw = document.getElementById('rawInput').value.trim();
+  if (!raw) { showError('Please enter your raw analysis first.'); return; }
+
+  const apiKey = document.getElementById('apiKeyInput').value.trim();
+  if (!apiKey) { showError('Please enter your Groq API key first.'); return; }
+
+  const btn = document.getElementById('generateBtn');
+  const error = document.getElementById('errorMsg');
+  error.classList.remove('visible');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Generating...';
+
+  showLoadingResult();
+
+  try {
+    const response = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: buildSystemPrompt(),
+        user: buildUserPrompt(raw),
+        apiKey: apiKey
+      })
+    });
+
+    if (!response.ok) throw new Error('Worker error: ' + response.status);
+    const data = await response.json();
+    
+    let text = '';
+    if (data.content && data.content[0]) {
+      text = data.content[0].text || '';
+    } else if (data.text) {
+      text = data.text;
+    } else {
+      text = JSON.stringify(data);
+    }
+
+    // Strip possible markdown fences
+    text = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(text);
+    renderResults(parsed);
+
+  } catch (err) {
+    showError('Error: ' + err.message + '. Make sure your Cloudflare Worker URL is set correctly.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Generate Content';
+  }
+}
+
+function showLoadingResult() {
+  const container = document.getElementById('resultsContainer');
+  const card = document.getElementById('resultCard');
+  const tabs = document.getElementById('resultTabs');
+  tabs.innerHTML = '';
+  card.innerHTML = `
+    <div class="result-toolbar">
+      <div class="result-meta"><span class="meta-badge badge-short">Processing</span></div>
+    </div>
+    <div class="result-content loading"><span class="spinner"></span>Rewriting your analysis...</div>
+    <div class="status-bar"><div class="status-dot"></div>Claude API — generating...</div>
+  `;
+  container.classList.add('visible');
+}
+
+function renderResults(data) {
+  const tabs = document.getElementById('resultTabs');
+  const card = document.getElementById('resultCard');
+  
+  generatedOutputs = [];
+  const tabDefs = [];
+
+  if (data.twitter_short !== undefined || data.twitter_thread !== undefined) {
+    if (data.twitter_short) {
+      generatedOutputs.push({ type: 'short', platform: 'twitter', content: data.twitter_short, label: 'X Post' });
+      tabDefs.push({ label: 'X Post', idx: generatedOutputs.length - 1 });
+    }
+    if (data.twitter_thread) {
+      generatedOutputs.push({ type: 'thread', platform: 'twitter', content: data.twitter_thread, label: 'X Thread' });
+      tabDefs.push({ label: 'X Thread', idx: generatedOutputs.length - 1 });
+    }
+  }
+  if (data.telegram_short !== undefined || data.telegram_thread !== undefined) {
+    if (data.telegram_short) {
+      generatedOutputs.push({ type: 'short', platform: 'telegram', content: data.telegram_short, label: 'TG Post' });
+      tabDefs.push({ label: 'TG Post', idx: generatedOutputs.length - 1 });
+    }
+    if (data.telegram_thread) {
+      generatedOutputs.push({ type: 'thread', platform: 'telegram', content: data.telegram_thread, label: 'TG Thread' });
+      tabDefs.push({ label: 'TG Thread', idx: generatedOutputs.length - 1 });
+    }
+  }
+  // Short mode: twitter_short / telegram_short at top level
+  if (data.twitter_short === undefined && data.telegram_short === undefined && (currentMode === 'short')) {
+    if (data.twitter) {
+      generatedOutputs.push({ type: 'short', platform: 'twitter', content: data.twitter, label: 'X Post' });
+      tabDefs.push({ label: 'X Post', idx: generatedOutputs.length - 1 });
+    }
+    if (data.telegram) {
+      generatedOutputs.push({ type: 'short', platform: 'telegram', content: data.telegram, label: 'TG Post' });
+      tabDefs.push({ label: 'TG Post', idx: generatedOutputs.length - 1 });
+    }
+  }
+  if (data.article) {
+    generatedOutputs.push({ type: 'article', platform: 'both', content: data.article, label: 'Article' });
+    tabDefs.push({ label: 'Article', idx: generatedOutputs.length - 1 });
+  }
+
+  // Also handle simple short mode keys
+  Object.keys(data).forEach(k => {
+    if ((k === 'twitter_short' || k === 'telegram_short') && !tabDefs.find(t => t.label.toLowerCase().includes(k.includes('twitter') ? 'x post' : 'tg post'))) {
+      const plat = k.includes('twitter') ? 'twitter' : 'telegram';
+      const label = plat === 'twitter' ? 'X Post' : 'TG Post';
+      generatedOutputs.push({ type: 'short', platform: plat, content: data[k], label });
+      tabDefs.push({ label, idx: generatedOutputs.length - 1 });
+    }
+  });
+
+  if (generatedOutputs.length === 0) {
+    card.innerHTML = `<div class="result-content loading">Could not parse output. Raw: ${JSON.stringify(data).slice(0,300)}</div>`;
+    return;
+  }
+
+  // Render tabs
+  tabs.innerHTML = tabDefs.map((t, i) =>
+    `<div class="result-tab ${i === 0 ? 'active' : ''}" onclick="switchTab(${i})">${t.label}</div>`
+  ).join('');
+
+  renderTab(0);
+}
+
+function switchTab(idx) {
+  currentTab = idx;
+  document.querySelectorAll('.result-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  renderTab(idx);
+}
+
+function renderTab(idx) {
+  const out = generatedOutputs[idx];
+  const card = document.getElementById('resultCard');
+  if (!out) return;
+
+  const badgeClass = out.platform === 'twitter' ? 'badge-twitter' : out.platform === 'telegram' ? 'badge-telegram' : 'badge-short';
+  const badgeLabel = out.platform === 'twitter' ? '𝕏 Twitter' : out.platform === 'telegram' ? '✈ Telegram' : 'Article';
+  const typeLabel = out.type === 'thread' ? 'thread' : out.type === 'article' ? 'article' : 'post';
+
+  let contentHTML = '';
+
+  if (out.type === 'thread' && Array.isArray(out.content)) {
+    contentHTML = out.content.map((post, i) => `
+      ${i > 0 ? '<div class="thread-connector"></div>' : ''}
+      <div class="thread-post">
+        <div class="thread-post-num">${i + 1} / ${out.content.length}</div>
+        ${escHtml(post)}
+      </div>
+    `).join('');
+    contentHTML = `<div style="padding: 16px;">${contentHTML}</div>`;
+  } else if (out.type === 'article') {
+    contentHTML = `<div class="result-content" style="white-space: pre-wrap; font-size: 14px; line-height: 1.9;">${escHtml(out.content)}</div>`;
+  } else {
+    const chars = typeof out.content === 'string' ? out.content.length : 0;
+    const charColor = out.platform === 'twitter' && chars > 280 ? 'color: var(--red)' : '';
+    contentHTML = `
+      <div class="result-content">${escHtml(out.content)}</div>
+      <div class="status-bar">
+        <div class="status-dot" style="background: ${chars <= 280 ? 'var(--green)' : 'var(--red)'}"></div>
+        <span style="${charColor}">${chars} chars</span>
+        ${out.platform === 'twitter' ? `<span style="color: var(--text-muted)">— 280 limit</span>` : ''}
+      </div>
+    `;
+  }
+
+  const rawForCopy = out.type === 'thread' && Array.isArray(out.content)
+    ? out.content.join('\n\n---\n\n')
+    : out.content;
+
+  card.innerHTML = `
+    <div class="result-toolbar">
+      <div class="result-meta">
+        <span class="meta-badge ${badgeClass}">${badgeLabel}</span>
+        <span class="meta-badge" style="background: var(--bg-input); color: var(--text-secondary);">${typeLabel}</span>
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn-action" onclick="copyContent(this, ${idx})" id="copyBtn${idx}">
+          ⊕ Copy
+        </button>
+        <button class="btn-action" onclick="regenerateSingle(${idx})">↺ Redo</button>
+      </div>
+    </div>
+    ${contentHTML}
+  `;
+}
+
+function copyContent(btn, idx) {
+  const out = generatedOutputs[idx];
+  const text = Array.isArray(out.content) ? out.content.join('\n\n---\n\n') : out.content;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.innerHTML = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = '⊕ Copy'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+async function regenerateSingle(idx) {
+  const raw = document.getElementById('rawInput').value.trim();
+  if (!raw) return;
+  const out = generatedOutputs[idx];
+  const card = document.getElementById('resultCard');
+  card.innerHTML = `<div class="result-content loading"><span class="spinner"></span>Regenerating ${out.label}...</div>`;
+  // Re-run full generate since we need API call
+  await generate();
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+function escHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g, '<br>');
+}
+</script>
+</body>
+</html>
