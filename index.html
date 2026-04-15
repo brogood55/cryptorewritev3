@@ -566,7 +566,7 @@ let currentTone = 'analyst';
 let currentTab = 0;
 let generatedOutputs = [];
 
-const WORKER_URL = 'https://cryptorewritev2.brobzrkv.workers.dev'; // <-- ganti dengan URL Cloudflare Worker kamu
+const WORKER_URL = 'https://YOUR_WORKER.workers.dev'; // <-- ganti dengan URL Cloudflare Worker kamu
 
 // API Key helpers — simpan di localStorage agar tidak perlu isi ulang
 function saveApiKey(val) {
@@ -621,7 +621,7 @@ CRITICAL RULES:
 - Every post must have a hook on line 1.
 - Soft question or observation at the end — don't beg for engagement.
 
-Respond ONLY with valid JSON. No markdown, no backticks, no preamble.`;
+Respond ONLY with valid JSON. No markdown, no backticks, no preamble. All string values must use \n for line breaks — never raw newlines inside JSON strings.`;
 }
 
 function buildUserPrompt(rawText) {
@@ -664,6 +664,34 @@ Generate deep analysis content. Return JSON:
   }
 }
 
+function sanitizeJsonString(str) {
+  // Replace unescaped control characters inside JSON string values
+  // Walk char-by-char tracking whether we're inside a JSON string
+  let result = '';
+  let inString = false;
+  let escape = false;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (escape) {
+      result += ch;
+      escape = false;
+      continue;
+    }
+    if (ch === '\\') { escape = true; result += ch; continue; }
+    if (ch === '"') { inString = !inString; result += ch; continue; }
+    if (inString) {
+      // Escape bare control characters that are illegal inside JSON strings
+      const code = ch.charCodeAt(0);
+      if (code === 10) { result += '\\n'; continue; }
+      if (code === 13) { result += '\\r'; continue; }
+      if (code === 9)  { result += '\\t'; continue; }
+      if (code < 32)   { result += '\\u' + code.toString(16).padStart(4,'0'); continue; }
+    }
+    result += ch;
+  }
+  return result;
+}
+
 async function generate() {
   const raw = document.getElementById('rawInput').value.trim();
   if (!raw) { showError('Please enter your raw analysis first.'); return; }
@@ -690,7 +718,10 @@ async function generate() {
       })
     });
 
-    if (!response.ok) throw new Error('Worker error: ' + response.status);
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || 'Worker responded with status ' + response.status);
+    }
     const data = await response.json();
     
     let text = '';
@@ -702,13 +733,15 @@ async function generate() {
       text = JSON.stringify(data);
     }
 
-    // Strip possible markdown fences
+    // Strip markdown fences, then sanitize control characters that break JSON.parse
     text = text.replace(/```json|```/g, '').trim();
+    // Replace literal newlines/tabs inside JSON string values so JSON.parse doesn't choke
+    text = sanitizeJsonString(text);
     const parsed = JSON.parse(text);
     renderResults(parsed);
 
   } catch (err) {
-    showError('Error: ' + err.message + '. Make sure your Cloudflare Worker URL is set correctly.');
+    showError('Generation failed: ' + err.message);
   } finally {
     btn.disabled = false;
     btn.innerHTML = 'Generate Content';
